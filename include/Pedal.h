@@ -3,6 +3,7 @@
 #endif
 
 #define PEDAL_VOLTAGE_THRESHOLD 0.07f
+#define PEDAL_RATE_OF_CHANGE 10
 
 enum PedalMode {
     PEDAL_SWITCH = 0,

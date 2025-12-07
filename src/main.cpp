@@ -82,13 +82,13 @@ void eventUpdate()
     }
     if (direction)
     {
-      wahPercent += 5;
+      wahPercent += PEDAL_RATE_OF_CHANGE;
       if (wahPercent > 100)
         wahPercent = 100;
     }
     else
     {
-      wahPercent -= 5;
+      wahPercent -= PEDAL_RATE_OF_CHANGE;
       if (wahPercent < 0)
         wahPercent = 0;
     }
