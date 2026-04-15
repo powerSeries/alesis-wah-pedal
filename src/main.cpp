@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Pedal.h>
+#include <network.h>
 
 const int analogPin = A0;
 const int btnPin = D1;
@@ -20,47 +21,56 @@ int wahPercent = 0;
 float lastVoltage = 0.0f;
 int direction = 0; // 0 -> down, 1 -> up
 
+const char* ssid = "<INSERT INFO>";
+const char* password = "<INSERT INFO>";
+
+Network* network;
+
 void setupWiFi();
 void eventUpdate();
 
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
+
   pinMode(analogPin, INPUT);
   pinMode(btnPin, INPUT_PULLUP);
   
+  network = new Network(ssid, password);
 }
 
 void loop() {
+
+  network->server.handleClient();
   // put your main code here, to run repeatedly:
-  sensorValue = analogRead(analogPin);
-  btnState = digitalRead(btnPin);
+  // sensorValue = analogRead(analogPin);
+  // btnState = digitalRead(btnPin);
 
-  if(btnState == LOW)
-  {
-    if((millis() - lastTime) > debounceDelay)
-    {
-      lastTime = millis();
-      pedalMode = !pedalMode;
-      Serial.print("Pedal mode: ");
-      Serial.println(pedalMode);
-      delay(100);
-    }
-  }
+  // if(btnState == LOW)
+  // {
+  //   if((millis() - lastTime) > debounceDelay)
+  //   {
+  //     lastTime = millis();
+  //     pedalMode = !pedalMode;
+  //     Serial.print("Pedal mode: ");
+  //     Serial.println(pedalMode);
+  //     delay(100);
+  //   }
+  // }
 
-  voltage = (sensorValue * 3.3) / 1023;
-  if(pedalMode == PEDAL_SWITCH && voltage > PEDAL_VOLTAGE_THRESHOLD)
-  {
-    if((millis() - lastTime) > debounceDelay)
-    {
-      lastTime = millis();
-      eventUpdate();
-    }
-  }
-  else if(pedalMode == PEDAL_WAH)
-  {
-      eventUpdate();
-  }
+  // voltage = (sensorValue * 3.3) / 1023;
+  // if(pedalMode == PEDAL_SWITCH && voltage > PEDAL_VOLTAGE_THRESHOLD)
+  // {
+  //   if((millis() - lastTime) > debounceDelay)
+  //   {
+  //     lastTime = millis();
+  //     eventUpdate();
+  //   }
+  // }
+  // else if(pedalMode == PEDAL_WAH)
+  // {
+  //     eventUpdate();
+  // }
 }
 
 void eventUpdate()
@@ -99,7 +109,4 @@ void eventUpdate()
   default:
     break;
   }
-
-
-  delay(100);
 }
