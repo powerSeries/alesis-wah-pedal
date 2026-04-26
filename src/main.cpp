@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include <Pedal.h>
-#include <network.h>
-#include <UserData.h>
+#include "network.h"
+#include "UserData.h"
 
+#pragma region Pedal Setups
 const int analogPin = A0;
 const int btnPin = D1;
 
@@ -21,29 +22,26 @@ float voltage = 0.0f;
 int wahPercent = 0;
 float lastVoltage = 0.0f;
 int direction = 0; // 0 -> down, 1 -> up
-
-const char *ssid = "Jester Estate_2.4";
-const char *password = "jolynekujo6!";
+#pragma endregion
 
 Network *network;
+UserConfig config;
 
 void setupWiFi();
 void eventUpdate();
-void setup_eeprom();
 
 void setup()
 {
   // put your setup code here, to run once:
-
   Serial.begin(115200);
   EEPROM.begin(EEPROM_SIZE);
 
-  byte _first_run = EEPROM.read(FIRST_RUN_FLAG_ADDR);
-  if (!_first_run)
-  {
-    setup_eeprom();
-  }
-  else
+  //EEPROM.write(0, 0); // Clear the first run flag for testing purposes
+
+  EEPROM.get(FIRST_RUN_FLAG_ADDR, config);
+  Serial.print("First run flag: " + String(config.first_run_flag) + "\n");
+
+  if (config.first_run_flag == FIRST_RUN_FLAG_VALUE)
   {
     Serial.println("EEPROM already initialized.\n");
   }
@@ -51,15 +49,7 @@ void setup()
   pinMode(analogPin, INPUT);
   pinMode(btnPin, INPUT_PULLUP);
 
-  network = new Network(ssid, password);
-}
-
-void setup_eeprom()
-{
-  Serial.println("First run detected, initializing EEPROM...\n");
-  EEPROM.write(FIRST_RUN_FLAG_ADDR, FIRST_RUN_FLAG_VALUE);
-  EEPROM.commit();
-  EEPROM.end();
+  network = new Network(config);
 }
 
 void loop()
