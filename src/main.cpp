@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <Pedal.h>
 #include <network.h>
+#include <UserData.h>
 
 const int analogPin = A0;
 const int btnPin = D1;
@@ -21,25 +22,48 @@ int wahPercent = 0;
 float lastVoltage = 0.0f;
 int direction = 0; // 0 -> down, 1 -> up
 
-const char* ssid = "<INSERT INFO>";
-const char* password = "<INSERT INFO>";
+const char *ssid = "Jester Estate_2.4";
+const char *password = "jolynekujo6!";
 
-Network* network;
+Network *network;
 
 void setupWiFi();
 void eventUpdate();
+void setup_eeprom();
 
-void setup() {
+void setup()
+{
   // put your setup code here, to run once:
+
   Serial.begin(115200);
+  EEPROM.begin(EEPROM_SIZE);
+
+  byte _first_run = EEPROM.read(FIRST_RUN_FLAG_ADDR);
+  if (!_first_run)
+  {
+    setup_eeprom();
+  }
+  else
+  {
+    Serial.println("EEPROM already initialized.\n");
+  }
 
   pinMode(analogPin, INPUT);
   pinMode(btnPin, INPUT_PULLUP);
-  
+
   network = new Network(ssid, password);
 }
 
-void loop() {
+void setup_eeprom()
+{
+  Serial.println("First run detected, initializing EEPROM...\n");
+  EEPROM.write(FIRST_RUN_FLAG_ADDR, FIRST_RUN_FLAG_VALUE);
+  EEPROM.commit();
+  EEPROM.end();
+}
+
+void loop()
+{
 
   network->server.handleClient();
   // put your main code here, to run repeatedly:
