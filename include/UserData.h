@@ -2,8 +2,7 @@
 #ifndef USERDATA_H
 #define USERDATA_H
 
-
-#include <EEPROM.h>
+#include <Arduino.h>
 
 const int EEPROM_SIZE = 512;
 

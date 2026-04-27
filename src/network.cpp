@@ -2,6 +2,7 @@
 #include "network.h"
 #include "UserData.h"
 #include <string>
+#include <EEPROM.h>
 
 
 
@@ -30,18 +31,12 @@ Network::Network(UserConfig config)
         Serial.print("IP address:" + WiFi.localIP().toString() + "\n");
 
         IPAddress testIP(10, 0, 0, 199);
-        bool pingResult = false;
-        while (!pingResult)
+        bool server_status = false;
+        while (!server_status)
         {
-            pingResult = Ping.ping(testIP);
-            Serial.print("Pinging " + testIP.toString() + ": " + (pingResult ? "Success" : "Failed") + "\n");
+            server_status = Ping.ping(testIP);
+            Serial.print("Pinging " + testIP.toString() + ": " + (server_status ? "Success" : "Failed") + "\n");
             delay(1000);
-        }
-
-        if (pingResult)
-        {
-            int status = send_post_request();
-            Serial.print("POST request status: " + String(status) + "\n");
         }
     }
 
@@ -115,19 +110,6 @@ void Network::register_device(const char* ssid, const char* secret)
     EEPROM.end();
 }
 
-int Network::send_post_request()
-{
-    WiFiUDP udp;
-    udp.beginPacket("10.0.0.199", 8000);
-
-    udp.write("Hello, UDP Server!");
-    udp.endPacket();
-
-    delay(1000); // Wait for the server to process the packet
-
-    return 0;
-}
-
 void Network::setup_login_page()
 {
     IPAddress apIP(10, 0, 0, 1);
@@ -145,3 +127,30 @@ void Network::http_client()
     server.handleClient();
     Serial.println("HTTP server started");
 }
+
+void Network::send_fx_switch()
+{
+    OSCMessage message("/reaper/midi_cc");
+    message.add(74);
+    message.add(1);
+
+    send_post_request(message);
+}
+
+void Network::send_wah_position(float wah_percent)
+{
+    // TODO: Implement wah back
+}
+
+
+void Network::send_post_request(OSCMessage& message)
+{
+    udp.beginPacket("10.0.0.199", 8000);
+    message.send(udp);
+    udp.endPacket();
+
+    delay(100); // Brief delay to allow packet to be sent
+
+    message.empty(); // Clear the message after sending
+}
+

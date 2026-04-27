@@ -20,25 +20,31 @@
 
 // Reaper OSC Setup
 #include <WiFiUdp.h>
+#include <OSCMessage.h>
 
-class Network {
+class Network 
+{
     public:
-        wl_status_t server_status;
+        bool server_status;
         ESP8266WebServer server;
         DNSServer dnsServer;
+        WiFiUDP udp;
         UserConfig user_config;
 
         Network(UserConfig config);
 
         void http_client();
 
-        int send_post_request();
+        void send_fx_switch();
+        void send_wah_position(float wah_percent);
         
     private:
 
         void setup_login_page();
         void register_routes();
         void register_device(const char* ssid, const char* secret);
+
+        void send_post_request(OSCMessage& message);
         
 };
 #endif
